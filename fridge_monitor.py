@@ -19,13 +19,13 @@ class FridgeWatcher:
         self.last_alert_day = time.gmtime(time.time())[2] # day of month
 
     # set delay until next scan
-    def set_delay(self, report, alerted=False):
-        if alerted:
-            # scale up to daily alerts if not corrected
-            self.delay = max([self.delay * 4, 3600 * 24])
-        else:
+    def set_delay(self, report: GoveeReading=None, healthy: bool=False):
+        if healthy:
             # TODO: scale to safety margin from setpoints
             self.delay = 300
+        else:
+            # scale up to daily alerts if not corrected
+            self.delay = min([self.delay * 4, 3600 * 24])
 
     async def discover(self, retries: int=3):
         reports = await self.scanner.scan()
