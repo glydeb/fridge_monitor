@@ -9,8 +9,8 @@ class DeviceNotFoundError(Exception):
 class FridgeWatcher:
     def __init__(self, sensor: str, temp_limit: float=20.0, batt_limit: int=30):
         self.sensor = sensor
-        self.temp = temp_limit
-        self.batt = batt_limit
+        self.temp_limit = temp_limit
+        self.batt_limit = batt_limit
         self.scanner = SensorScanner(60.0)
         self.delay = 300
         self.last_alert_day = time.gmtime(time.time())[2] # day of month
@@ -63,12 +63,12 @@ class FridgeWatcher:
             alert = f'Lost contact with {self.sensor}'
             healthy = False
 
-        elif readings.temp_F() > 32.1:
+        elif readings.temp_F() > self.temp_limit:
             print("sending temp alarm")
             alert = 'High temp alert!'
             healthy = False
 
-        elif readings.battery() < 50:
+        elif readings.battery() < self.batt_limit:
             print("sending battery alarm")
             alert = 'Sensor Battery Failing!'
             healthy = False
