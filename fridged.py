@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import os
 import sys
 import asyncio
@@ -10,8 +11,8 @@ load_dotenv()
 
 SENSOR_NAME =  "GVH5101_334C"
 EVENT_NAME = "fridge_alert"
-MAX_TEMP_F = 20.0
-MIN_BATTERY = 25
+DEFAULT_MAX_TEMP_F = 10.0
+DEFAULT_MIN_BATTERY = 25
 
 # initialize web service
 def ifttt():
@@ -22,12 +23,36 @@ def ifttt():
         sys.exit(1)
     return IFTTTService(EVENT_NAME, web_key)
 
+def max_temp():
+    env_var = os.environ.get('MAX_TEMP_F')
+    if type(env_var) is str:
+        try:
+            output = float(env_var)
+            return output
+        except ValueError:
+            pass
+
+    return DEFAULT_MAX_TEMP_F
+    
+def min_batt():
+    env_var = os.environ.get('MIN_BATTERY')
+    if type(env_var) is str:
+        try:
+            min_batt = int(env_var)
+            if min_batt > 70 | min_batt < 10:
+                raise ValueError
+            return min_batt
+        except ValueError:
+            pass
+
+    return DEFAULT_MIN_BATTERY
+    
 
 async def main():
     notifier = ifttt()
 
     # initialize Fridge watcher
-    watcher = FridgeWatcher(sensor=SENSOR_NAME, temp_limit=MAX_TEMP_F, batt_limit=MIN_BATTERY)
+    watcher = FridgeWatcher(sensor=SENSOR_NAME, temp_limit=max_temp(), batt_limit=min_batt())
 
     # Discover fridge
     initial_readings = await watcher.discover()
