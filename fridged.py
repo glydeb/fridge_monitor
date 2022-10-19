@@ -3,6 +3,10 @@ import sys
 import asyncio
 from fridge_monitor import FridgeWatcher
 from ifttt_service import IFTTTService
+from dotenv import load_dotenv
+
+# Loads IFTTT_KEY from .env file
+load_dotenv()
 
 SENSOR_NAME =  "GVH5101_334C"
 EVENT_NAME = "fridge_alert"

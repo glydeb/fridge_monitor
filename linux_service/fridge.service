@@ -9,7 +9,6 @@ Restart=on-failure
 RestartSec=500s
 StartLimitIntervalSec=1800
 StartLimitBurst=2
-Environment="IFTTT_KEY=<Your_IFTTT_key_here>"
 Environment="PYTHONPATH=/home/relay/.local/lib/python3.9/site-packages:/usr/local/lib/python3.9/dist-packages:/usr/lib/python3/dist-packages"
 
 [Install]
