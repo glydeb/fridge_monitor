@@ -4,6 +4,7 @@ import sys
 import asyncio
 from fridge_monitor import FridgeWatcher
 from ifttt_service import IFTTTService
+from render_com_service import RenderComService
 from dotenv import load_dotenv
 
 # Loads IFTTT_KEY from .env file
@@ -22,6 +23,10 @@ def ifttt():
         print("IFTTT_KEY environment variable not set!")
         sys.exit(1)
     return IFTTTService(EVENT_NAME, web_key)
+
+# initialize monitoring app
+def fridge_mon_service():
+    return FridgeWatcher(sensor=SENSOR_NAME, temp_limit=max_temp(), batt_limit=min_batt())
 
 def max_temp():
     env_var = os.environ.get('MAX_TEMP_F')
