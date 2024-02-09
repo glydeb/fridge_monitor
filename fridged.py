@@ -10,12 +10,10 @@ from dotenv import load_dotenv
 # Loads IFTTT_KEY from .env file
 load_dotenv()
 
-SENSOR_NAME =  "GVH5101_334C"
-EVENT_NAME = "fridge_alert"
 DEFAULT_MAX_TEMP_F = 10.0
 DEFAULT_MIN_BATTERY = 25
 
-# initialize web service
+# initialize web services
 def ifttt():
     web_key = os.environ.get('IFTTT_KEY')
     # If there's no key present, we can't request to IFTTT
@@ -54,7 +52,10 @@ def min_batt():
     
 
 async def main():
-    notifier = ifttt()
+    if os.environ.get('SERVICE') == 'render':
+        notifier = RenderComService()
+    else:
+        notifier = ifttt()
 
     # initialize Fridge watcher
     watcher = FridgeWatcher(sensor=SENSOR_NAME, temp_limit=max_temp(), batt_limit=min_batt())
