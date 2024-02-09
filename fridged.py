@@ -33,7 +33,7 @@ def max_temp():
             output = float(env_var)
             return output
         except ValueError:
-            pass
+            print(f'Invalid or missing environment value for MIN_BATTERY: {env_var}')
 
     return DEFAULT_MAX_TEMP_F
     
@@ -46,7 +46,7 @@ def min_batt():
                 raise ValueError
             return min_batt
         except ValueError:
-            pass
+            print(f'Invalid or missing environment value for MIN_BATTERY: {env_var}')
 
     return DEFAULT_MIN_BATTERY
     
@@ -58,6 +58,8 @@ async def main():
         notifier = ifttt()
 
     # initialize Fridge watcher
+    SENSOR_NAME = os.environ.get('SENSOR_NAME')
+
     watcher = FridgeWatcher(sensor=SENSOR_NAME, temp_limit=max_temp(), batt_limit=min_batt())
 
     # Discover fridge

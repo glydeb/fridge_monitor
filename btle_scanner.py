@@ -4,21 +4,15 @@ from sensors.GoveeSensor import GoveeReading
 from bleak import *
 
 class SensorScanner:
-    def __init__(self, delay: float):
-        self.delay = delay
-        self.readings = dict()
+    def __init__(self, scan_time: float, target_sensor: str = "GVH5101_334C"):
+        self.scan_time = scan_time
         self.scanner = BleakScanner()
-        self.scanner.register_detection_callback(self.detection_callback)
 
     async def scan(self):
         await self.scanner.start()
-        await asyncio.sleep(self.delay)
+        await asyncio.sleep(self.scan_time)
         await self.scanner.stop()
-        return self.readings
-
-    async def detection_callback(self, device, advertisement_data):
-        if device.name[:7] == "GVH5101":
-            self.readings[device.address] = GoveeReading(device, advertisement_data)
+        return self.scanner.discovered_devices_and_advertisement_data.values()
 
     def clear_readings(self):
         extracted = list(self.readings.values())
@@ -30,10 +24,9 @@ if __name__ == "__main__":
     scanner = SensorScanner(30.0)
 
     while True:
-        sensors = asyncio.run(scanner.scan())
+        detections = asyncio.run(scanner.scan())
         # print and clear readings
-        for sensor in sensors.values():
-            temp_C, humidity, battery = sensor.readings()
+        for detection in detections:
+            sensor = GoveeReading(detection[0], detection[1])
+            temp_C, humidity, battery = sensor.decode_5101()
             print("sensor: {}, temp: {} degC, rh: {}%, battery: {}%".format(sensor.name, temp_C, humidity, battery))
-        scanner.clear_readings()
-        # print(sensor_readings)
