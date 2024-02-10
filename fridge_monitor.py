@@ -4,6 +4,7 @@ from btle_scanner import SensorScanner
 from sensors.GoveeSensor import GoveeReading
 
 class DeviceNotFoundError(Exception):
+    print("Device not found")
     pass
 
 class FridgeWatcher:
@@ -28,11 +29,13 @@ class FridgeWatcher:
             self.delay = min([self.delay * 4, 3600 * 24])
 
     async def discover(self, retries: int=3):
-        reports = await self.scanner.scan()
+        detections = await self.scanner.scan()
         # for now, just loop until you find the right reading
-        for report in reports.values():
+        for detection in detections:
+            report = GoveeReading(detection[0], detection[1])
             if report.name == self.sensor:
                 self.set_delay(report)
+                # set initial day of month for alerting
                 self.reset_last_alert()
                 return report
         if retries == 0:
@@ -44,20 +47,20 @@ class FridgeWatcher:
 
     async def monitor(self, retries: int=2):
         await asyncio.sleep(self.delay)
-        reports = await self.scanner.scan()
-        status = self.health_check(reports)
+        detections = await self.scanner.scan()
+        status = self.health_check(detections)
         return status
 
-    def our_sensor_report(self, reports: dict):
-        our_report = None
-        for report in reports.values():
-            if report.name == self.sensor:
-                our_report = report
-        return our_report
+    def our_sensor_reading(self):
+        our_reading = None
+        detection = self.scanner.findDeviceByName(self.sensor)
+        if detection != None:
+            our_reading = GoveeReading(detection[0], detection[1])
+        return our_reading
 
-    def health_check(self, reports: dict):
+    def health_check(self, detections: dict):
         healthy = True
-        readings = self.our_sensor_report(reports)
+        readings = self.our_sensor_report(detections)
         if readings == None:
             print("Sending loss of contact")
             alert = f'Lost contact with {self.sensor}'
@@ -76,5 +79,4 @@ class FridgeWatcher:
         if healthy:
             alert = ""
         self.set_delay(readings, healthy)
-        self.scanner.clear_readings()
         return alert, readings

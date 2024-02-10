@@ -14,11 +14,6 @@ class SensorScanner:
         await self.scanner.stop()
         return self.scanner.discovered_devices_and_advertisement_data.values()
 
-    def clear_readings(self):
-        extracted = list(self.readings.values())
-        self.readings = dict()
-        return extracted
-
 # can be run standalone
 if __name__ == "__main__":
     scanner = SensorScanner(30.0)
