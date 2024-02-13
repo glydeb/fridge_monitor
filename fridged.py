@@ -16,6 +16,7 @@ DEFAULT_MIN_BATTERY = 25
 # initialize web services
 def ifttt():
     web_key = os.environ.get('IFTTT_KEY')
+    EVENT_NAME = os.environ.get('EVENT_NAME')
     # If there's no key present, we can't request to IFTTT
     if web_key == None:
         print("IFTTT_KEY environment variable not set!")
@@ -24,6 +25,7 @@ def ifttt():
 
 # initialize monitoring app
 def fridge_mon_service():
+    SENSOR_NAME = os.environ.get('SENSOR_NAME')
     return FridgeWatcher(sensor=SENSOR_NAME, temp_limit=max_temp(), batt_limit=min_batt())
 
 def max_temp():
@@ -63,20 +65,23 @@ async def main():
     watcher = FridgeWatcher(sensor=SENSOR_NAME, temp_limit=max_temp(), batt_limit=min_batt())
 
     # Discover fridge
-    initial_readings = await watcher.discover()
+    initial_reading = await watcher.discover()
 
     try:
         # Notify of monitoring start/initial status
-        notifier.post(f'{SENSOR_NAME} monitoring established', initial_readings)
+        result = notifier.post(f'{SENSOR_NAME} monitoring established', initial_reading)
+        print(result)
 
         # Monitoring loop
         while True:
-            alert, readings = await watcher.monitor()
+            alert, reading = await watcher.monitor()
+            print(f'Alert: {alert}')
             if alert != "":
-                notifier.post(alert, readings)
+                notifier.post(alert, reading)
     finally:
         # Fault handling
-        notifier.post(f'{SENSOR_NAME} monitoring disabled')
+        response = notifier.post(f'{SENSOR_NAME} monitoring disabled')
+        print(response)
 
 if __name__ == "__main__":
     asyncio.run(main())

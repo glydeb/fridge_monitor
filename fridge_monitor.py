@@ -4,6 +4,7 @@ from btle_scanner import SensorScanner
 from sensors.GoveeSensor import GoveeReading
 
 class DeviceNotFoundError(Exception):
+    print(Exception)
     print("Device not found")
     pass
 
@@ -12,12 +13,13 @@ class FridgeWatcher:
         self.sensor = sensor
         self.temp_limit = temp_limit
         self.batt_limit = batt_limit
-        self.scanner = SensorScanner(60.0, "GVH5101_7F32")
+        self.scanner = SensorScanner(20.0, "GVH5101_7F32")
         self.delay = 300
         self.last_alert_day = time.gmtime(time.time())[2] # day of month
     
     def reset_last_alert(self):
         self.last_alert_day = time.gmtime(time.time())[2] # day of month
+        print(self.last_alert_day)
 
     # set delay until next scan
     def set_delay(self, report: GoveeReading=None, healthy: bool=False):
@@ -55,7 +57,7 @@ class FridgeWatcher:
     def our_sensor_reading(self, device):
         our_reading = None
         if device != None:
-            our_reading = GoveeReading(detection[0], detection[1])
+            our_reading = GoveeReading(device[0], device[1])
         return our_reading
 
     def health_check(self, reading: GoveeReading):
