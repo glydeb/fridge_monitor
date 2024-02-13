@@ -12,7 +12,7 @@ class FridgeWatcher:
         self.sensor = sensor
         self.temp_limit = temp_limit
         self.batt_limit = batt_limit
-        self.scanner = SensorScanner(60.0)
+        self.scanner = SensorScanner(60.0, "GVH5101_7F32")
         self.delay = 300
         self.last_alert_day = time.gmtime(time.time())[2] # day of month
     
@@ -29,54 +29,53 @@ class FridgeWatcher:
             self.delay = min([self.delay * 4, 3600 * 24])
 
     async def discover(self, retries: int=3):
-        detections = await self.scanner.scan()
+        device = await self.scanner.scan()
         # for now, just loop until you find the right reading
-        for detection in detections:
-            report = GoveeReading(detection[0], detection[1])
-            if report.name == self.sensor:
-                self.set_delay(report)
-                # set initial day of month for alerting
-                self.reset_last_alert()
-                return report
+        if device != None:   
+            report = GoveeReading(device[0], device[1])
+            self.set_delay(report)
+            # set initial day of month for alerting
+            self.reset_last_alert()
+            return report
         if retries == 0:
             print("device not found - exiting")
             raise DeviceNotFoundError
         else:
             print("device not found - looking again")
-            self.discover(retries - 1)
+            retry = await self.discover(retries - 1)
+            return retry
 
     async def monitor(self, retries: int=2):
         await asyncio.sleep(self.delay)
-        detections = await self.scanner.scan()
-        status = self.health_check(detections)
+        device = await self.scanner.scan()
+        reading = self.our_sensor_reading(device)
+        status = self.health_check(reading)
         return status
 
-    def our_sensor_reading(self):
+    def our_sensor_reading(self, device):
         our_reading = None
-        detection = self.scanner.findDeviceByName(self.sensor)
-        if detection != None:
+        if device != None:
             our_reading = GoveeReading(detection[0], detection[1])
         return our_reading
 
-    def health_check(self, detections: dict):
+    def health_check(self, reading: GoveeReading):
         healthy = True
-        readings = self.our_sensor_report(detections)
-        if readings == None:
+        if reading == None:
             print("Sending loss of contact")
             alert = f'Lost contact with {self.sensor}'
             healthy = False
 
-        elif readings.temp_F() > self.temp_limit:
+        elif reading.temp_F() > self.temp_limit:
             print("sending temp alarm")
             alert = 'High temp alert!'
             healthy = False
 
-        elif readings.battery() < self.batt_limit:
+        elif reading.battery() < self.batt_limit:
             print("sending battery alarm")
             alert = 'Sensor Battery Failing!'
             healthy = False
 
         if healthy:
             alert = ""
-        self.set_delay(readings, healthy)
-        return alert, readings
+        self.set_delay(reading, healthy)
+        return alert, reading
