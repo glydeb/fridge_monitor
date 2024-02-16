@@ -55,7 +55,7 @@ def min_batt():
 
 async def main():
     if os.environ.get('SERVICE') == 'render':
-        notifier = RenderComService()
+        notifier = RenderComService(os.environ.get('FRIDGEMON_USER'))
     else:
         notifier = ifttt()
 

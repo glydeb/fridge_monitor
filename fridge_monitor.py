@@ -4,8 +4,6 @@ from btle_scanner import SensorScanner
 from sensors.GoveeSensor import GoveeReading
 
 class DeviceNotFoundError(Exception):
-    print(Exception)
-    print("Device not found")
     pass
 
 class FridgeWatcher:
