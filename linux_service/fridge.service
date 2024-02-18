@@ -4,13 +4,13 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/home/relay/fridge_monitor/.venv/bin/python3 /home/relay/fridge_monitor/fridged.py >> /home/relay/fridge.log
+ExecStart=/home/fridge_monitor/.venv/bin/python3 /home/relay/fridge_monitor/fridged.py >> /home/relay/fridge.log
 Restart=on-failure
 RestartSec=500s
 StartLimitIntervalSec=1800
 StartLimitBurst=2
-Environment="PYTHONPATH=/home/relay/.local/lib/python3.9/site-packages:/usr/local/lib/python3.9/dist-packages:/usr/lib/python3/dist-packages"
-EnvironmentFile=/home/relay/fridge_monitor/.env
+Environment="PYTHONPATH=/home/fridge_monitor/.local/lib/python3.9/site-packages:/usr/local/lib/python3.9/dist-packages:/usr/lib/python3/dist-packages"
+EnvironmentFile=/home/fridge_monitor/.env
 
 [Install]
 WantedBy=multi-user.target
