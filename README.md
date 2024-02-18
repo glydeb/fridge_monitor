@@ -30,9 +30,12 @@ To set up the Refrigerator Monitor on a Raspberry Pi, follow these steps:
 6. Create a .env file in the fridge_monitor directory with the following contents:
 ```
 SENSOR_NAME=your_sensor_name (e.g. GVH5101_XXXX, where XXXX is the unique hexadecimal digits for your sensor)
+FRIDGEMON_USER=your_user_name, given to you by the relay server admin (not necessary if you are using the IFTTT service)
 MAX_TEMP_F=10.0 (the app will alert if the temperature is above this value)
 MIN_BATTERY=25 (the app will alert if the remaind charge in the battery is below this value)
 SERVICE=render (If you are using the new render server)
+EVENT_NAME=the ifttt event name (e.g. fridge_alert). Not needed if you are using the new render server
+IFTTT_KEY=your_ifttt_key (not needed if you are using the new render server)    
 ```
 7. Copy the fridge.service file to /etc/systemd/system: `sudo cp fridge.service /etc/systemd/system`
 8. Start the service: `sudo systemctl start fridge`
