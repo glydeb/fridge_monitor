@@ -23,11 +23,13 @@ Uses bleak to scan for the GVH5101 - credit to the code of https://github.com/Th
 To set up the Refrigerator Monitor on a Raspberry Pi, follow these steps:
 
 1. Set up a Raspberry Pi with the latest version of Raspbian Lite; you can find the installation guide [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).  We recommend using a Pi Zero W for this project, as it is low-cost and has built-in Bluetooth.  Lite is recommended because you can use a smaller SD card and it has less overhead.
-2. Install git and pip: `sudo apt-get install git python3-pip`
+2. Install git and pip: `sudo apt-get install git python3-pip python3-venv`
 3. Clone the repository: `git clone https://github.com/fridge_monitor.git`
 4. Navigate to the project directory: `cd fridge_monitor`
-5. Install the required dependencies: `pip3 install -r requirements.txt`
-6. Create a .env file in the fridge_monitor directory with the following contents:
+5. Create a virtual environment: `python3 -m venv ./.venv`
+6. Activate the virtual environment: `source ./.venv/bin/activate`
+7. Install the required dependencies: `pip3 install -r requirements.txt`
+8. Create a .env file in the fridge_monitor directory with the following contents:
 ```
 SENSOR_NAME=your_sensor_name (e.g. GVH5101_XXXX, where XXXX is the unique hexadecimal digits for your sensor)
 FRIDGEMON_USER=your_user_name, given to you by the relay server admin (not necessary if you are using the IFTTT service)
@@ -37,8 +39,12 @@ SERVICE=render (If you are using the new render server)
 EVENT_NAME=the ifttt event name (e.g. fridge_alert). Not needed if you are using the new render server
 IFTTT_KEY=your_ifttt_key (not needed if you are using the new render server)    
 ```
-7. Copy the fridge.service file to /etc/systemd/system: `sudo cp fridge.service /etc/systemd/system`
-8. Start the service: `sudo systemctl start fridge`
-9. Enable the service to start on boot: `sudo systemctl enable fridge`
+9. Copy the fridge.service file to /etc/systemd/system: `sudo cp fridge.service /etc/systemd/system`
+10. Start the service: `sudo systemctl start fridge` (you can stop the service with `sudo systemctl stop fridge`)
+    You should now start getting alerts - the first will be a "monitoring started" alert.
+11. Enable the service to start on boot: `sudo systemctl enable fridge`
+    This will start the service on boot, so you don't have to manually start it after a power outage.
+12. Reboot the Pi: `sudo reboot`
+    You should again get a "monitoring started" alert after the reboot.
 
 
